@@ -1,4 +1,4 @@
-BOARD      = uno
+BOARD      = mega2560
 ARDUINODIR = /usr/share/arduino
 TARGET     = build/output
 
