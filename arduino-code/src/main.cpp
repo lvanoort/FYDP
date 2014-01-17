@@ -5,6 +5,8 @@
 #define LEFT_MOTOR_1 13
 #define LEFT_MOTOR_2 14
 
+#define DEBUG_MODE 0
+
 Servo l_servo1; Servo l_servo2; 
 
 unsigned long last_control;
@@ -39,38 +41,39 @@ void setup()
 
 void loop()
 {
+
   if (Serial.available() > 0) {
     unsigned char incomingByte = Serial.read();
     processByte(incomingByte);    
   }
   
-  //return;
-  
+#if DEBUG_MODE
   check_reg();
-  
+#endif
   
   //Security check: 
   //Ensure messages are being recieved from laptop
   //If no messages have been recieved over the last
   //second, halt all actuators
   if (millis() - 1000 > last_message) {
+#if DEBUG_MODE
     static int no_message_count;
     no_message_count = (no_message_count + 1) % 50;
     if(no_message_count == 0) {
       Serial.println("No messages recieved for 1s");
     }
+#endif
     
-    l_servo1.write(0);
-    l_servo2.write(0);
+    l_servo1.write(90);
+    l_servo2.write(90);
     delay(20);
     return;
   }
   
   //Write motor command
-  return;
   if (millis() - 20 > last_control) { //20ms update
-    l_servo1.write(integerRegisters[LEFT_MOTOR_CMD]);
-    l_servo2.write(integerRegisters[LEFT_MOTOR_CMD]);
+    l_servo1.write(90+integerRegisters[LEFT_MOTOR_CMD]);
+    l_servo2.write(90+integerRegisters[LEFT_MOTOR_CMD]);
     last_control = millis();
   }
 }

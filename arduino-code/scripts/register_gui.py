@@ -8,8 +8,8 @@ class SerialThread(threading.Thread):
         threading.Thread.__init__(self)
         self.quit_serial = False;
         self._address = 40
-        self._data1   = 1
-        self._data2   = 1
+        self._data1   = 0
+        self._data2   = 0
 
     def write_message(self):
         addHigh = (self._address & 0xFF00) >> 8
