@@ -6,11 +6,15 @@
 #define LEFT_MOTOR_1 13
 #define LEFT_MOTOR_2 14
 
+#define RIGHT_MOTOR_1 15
+#define RIGHT_MOTOR_2 16
+
 #define DEBUG_MODE 0
 
 #define DEBUG_ENCODER 1
 
 Servo l_servo1; Servo l_servo2; 
+Servo r_servo1; Servo r_servo2; 
 
 unsigned long last_control;
 
@@ -51,7 +55,8 @@ void setup()
 
   l_servo1.attach(LEFT_MOTOR_1);
   l_servo2.attach(LEFT_MOTOR_2);
-
+  r_servo1.attach(RIGHT_MOTOR_1);
+  r_servo2.attach(RIGHT_MOTOR_2);
   setup_encoders();
 
   delay(2000);
@@ -85,6 +90,8 @@ void loop()
     
     l_servo1.write(90);
     l_servo2.write(90);
+    r_servo1.write(90);
+    r_servo2.write(90);
     delay(20);
     return;
   }
@@ -97,6 +104,8 @@ void loop()
   if (millis() - 20 > last_control) { //20ms update
     l_servo1.write(90+integerRegisters[LEFT_MOTOR_CMD]);
     l_servo2.write(90+integerRegisters[LEFT_MOTOR_CMD]);
+    r_servo1.write(90+integerRegisters[RIGHT_MOTOR_CMD]);
+    r_servo2.write(90+integerRegisters[RIGHT_MOTOR_CMD]);
     last_control = millis();
   }
 }
