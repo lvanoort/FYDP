@@ -75,6 +75,10 @@ void loop()
   check_reg();
 #endif
   
+#if DEBUG_ENCODER
+  check_count();
+#endif
+  
   //Security check: 
   //Ensure messages are being recieved from laptop
   //If no messages have been recieved over the last
@@ -88,24 +92,20 @@ void loop()
     }
 #endif
     
-    l_servo1.write(90);
-    l_servo2.write(90);
-    r_servo1.write(90);
-    r_servo2.write(90);
+    l_servo1.write(95);
+    l_servo2.write(95);
+    r_servo1.write(95);
+    r_servo2.write(95);
     delay(20);
     return;
   }
 
-#if DEBUG_ENCODER
-  check_count();
-#endif
-
   //Write motor command
   if (millis() - 20 > last_control) { //20ms update
-    l_servo1.write(90+integerRegisters[LEFT_MOTOR_CMD]);
-    l_servo2.write(90+integerRegisters[LEFT_MOTOR_CMD]);
-    r_servo1.write(90+integerRegisters[RIGHT_MOTOR_CMD]);
-    r_servo2.write(90+integerRegisters[RIGHT_MOTOR_CMD]);
+    l_servo1.write(95+integerRegisters[LEFT_MOTOR_CMD]);
+    l_servo2.write(95+integerRegisters[LEFT_MOTOR_CMD]);
+    r_servo1.write(95+integerRegisters[RIGHT_MOTOR_CMD]);
+    r_servo2.write(95+integerRegisters[RIGHT_MOTOR_CMD]);
     last_control = millis();
   }
 }

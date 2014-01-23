@@ -15,24 +15,24 @@ geometry_msgs::Twist cmd;
 int open_port(void)
 {
 
-  fd = open("/dev/ttyACM0", O_RDWR | O_NOCTTY | O_NDELAY);
+  fd = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
+  sleep(4);
   if (fd == -1) {
     perror("open_port: Unable to open /dev/ttyf1 - ");
     return fd;
   }
-  else
-    fcntl(fd, F_SETFL, FNDELAY);
 
   //115200 bps, 8N1
 	struct termios options;
 	tcgetattr(fd, &options);
-	cfsetispeed(&options, B19200);
-	cfsetospeed(&options, B19200);
+	cfsetispeed(&options, B115200);
+	cfsetospeed(&options, B115200);
   options.c_cflag |= (CLOCAL | CREAD);
 	options.c_cflag &= ~PARENB;
 	options.c_cflag &= ~CSTOPB;
 	options.c_cflag &= ~CSIZE;
 	options.c_cflag |= CS8;
+	options.c_lflag |= ICANON;
   tcsetattr(fd, TCSANOW, &options);
 
   return (fd);
@@ -44,7 +44,6 @@ void write_commands(int left, int right)
     left = 90;
   else if (left < -90)
     left = -90;
-
 
   if (right > 90)
     right = 90;
@@ -63,17 +62,6 @@ void write_commands(int left, int right)
   int checksum = left + right + 40;
   buf[8] = (0xFF00 & checksum) >> 8;
   buf[9] = 0xFF & checksum;
-  
-  //alternatively, this may work
-  /*
-  unsigned int buf[5];
-  buf[0] = 0xFFFF;
-  buf[1] = 40;
-  buf[2] = (unsigned int) left;
-  buf[3] = (unsigned int) right;
-  int checksum = left + right + 40;
-  buf[4] = (unsigned int) checksum;
-  */
   
   int n = write(fd, buf, 10);
   if (n != 10)
@@ -98,7 +86,9 @@ int main(int argc, char* argv [])
   
   int port = open_port();
   if (port == -1)
-    return -1; //TODO; report error
+    return -1; //TODO: report error
+  
+  ROS_INFO("Serial port openned");
   
 	ros::Subscriber pose_sub = n.subscribe("/command", 1, command_callback);
 	ros::Timer timer = n.createTimer(ros::Duration(0.02), timerCallback);
