@@ -3,6 +3,7 @@
 
 void setup_encoders();
 
-int get_count();
+int get_count_r();
 
+int get_count_l();
 #endif

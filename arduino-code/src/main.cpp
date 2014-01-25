@@ -11,12 +11,13 @@
 
 #define DEBUG_MODE 0
 
-#define DEBUG_ENCODER 1
+#define DEBUG_ENCODER 0
 
 Servo l_servo1; Servo l_servo2; 
 Servo r_servo1; Servo r_servo2; 
 
 unsigned long last_control;
+unsigned long last_sensor;
 
 unsigned long last_check = 0;
 
@@ -33,7 +34,7 @@ void check_reg()
 void check_count()
 {
   if (millis() - 1000 > last_check) {
-      Serial.print(get_count(), DEC);
+      Serial.print(get_count_r(), DEC);
       Serial.println();
       last_check = millis();
   }
@@ -51,7 +52,7 @@ void setup()
   }
 
   //initialize control timers
-  last_control = last_message = last_check = millis();
+  last_sensor = last_control = last_message = last_check = millis();
 
   l_servo1.attach(LEFT_MOTOR_1);
   l_servo2.attach(LEFT_MOTOR_2);
@@ -78,6 +79,19 @@ void loop()
 #if DEBUG_ENCODER
   check_count();
 #endif
+
+  // Send sensor data
+  if (millis() - 20 > last_sensor) { //20ms update
+    //TODO send bytes out
+    int r_count = get_count_r();
+    Serial.print("R");
+    Serial.print(r_count, DEC);
+    int l_count = get_count_l();
+    Serial.print("L");
+    Serial.print(l_count, DEC);
+    Serial.println();
+    last_sensor = millis();
+  }
   
   //Security check: 
   //Ensure messages are being recieved from laptop
