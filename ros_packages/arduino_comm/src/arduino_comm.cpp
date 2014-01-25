@@ -33,6 +33,7 @@ int open_port(void)
 	options.c_cflag &= ~CSIZE;
 	options.c_cflag |= CS8;
 	options.c_lflag |= ICANON;
+	options.c_cflag &= ~CRTSCTS;
   tcsetattr(fd, TCSANOW, &options);
 
   return (fd);
