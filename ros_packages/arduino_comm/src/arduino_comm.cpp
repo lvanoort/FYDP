@@ -80,7 +80,7 @@ void command_callback(const geometry_msgs::Twist& msg)
 void timerCallback(const ros::TimerEvent& e)
 {
   //TODO: Map control inputs and outputs and fix sending stuff out
-  write_commands(cmd.linear.x, cmd.linear.y);
+  write_commands(-cmd.linear.x, -cmd.linear.y);
   
   //Health check
   static int ticks = 0;
@@ -97,24 +97,29 @@ void timerCallback(const ros::TimerEvent& e)
 
 void parse_string(std::string s)
 {
+  //ROS_INFO(s.c_str());
+
   std::string delimiters("RL");
   std::vector<std::string> tokens;
   boost::split(tokens,s,boost::is_any_of(delimiters));
   
-  if (tokens.size() != 2) {
-    ROS_ERROR("Parsing error");
+  // First token is blank
+  // Second is right
+  // Third is left
+  if (tokens.size() != 3) {
+    ROS_ERROR("Parsing error # of tokens = %d", tokens.size());
     return;
   }
   
-  int r;
-  int l;
-  try {
-    r = boost::lexical_cast<int>( tokens[0] );
-    l = boost::lexical_cast<int>( tokens[1] );
+  int r = atoi(tokens[1].c_str());
+  int l = atoi(tokens[2].c_str());
+  /*try {
+    r = boost::lexical_cast<int>( tokens[1] );
+    l = boost::lexical_cast<int>( tokens[2] );
   } catch( boost::bad_lexical_cast const& ) {
     ROS_ERROR("Parsing error");
     return;
-  }
+  }*/
   
   geometry_msgs::Twist msg;
   msg.linear.x = r;

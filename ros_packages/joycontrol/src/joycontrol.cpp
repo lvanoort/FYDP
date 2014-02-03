@@ -11,8 +11,8 @@ geometry_msgs::Twist input;
 
 void joy_callback(const sensor_msgs::Joy& msg)
 {
-  input.linear.x = msg.axes[1]*20;
-  input.linear.y = msg.axes[3]*20;
+  input.linear.x = msg.axes[1]*12;
+  input.linear.y = msg.axes[3]*12;
   //ROS_INFO ("hello");
 }
 

@@ -48,8 +48,8 @@ void callback()
 void setup()  
 {
   Serial.begin(115200);
-  while (!Serial) {
-  }
+  //while (!Serial) {
+  //}
 
   //initialize control timers
   last_sensor = last_control = last_message = last_check = millis();
