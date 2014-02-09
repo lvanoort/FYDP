@@ -8,6 +8,8 @@
 #include <geometry_msgs/Twist.h>
 #include <boost/algorithm/string.hpp>
 
+
+
 int fd;
 geometry_msgs::Twist cmd;
 ros::Publisher encoder_pub;
@@ -26,17 +28,17 @@ int open_port(void)
   }
 
   //115200 bps, 8N1
-	struct termios options;
-	tcgetattr(fd, &options);
-	cfsetispeed(&options, B115200);
-	cfsetospeed(&options, B115200);
+  struct termios options;
+  tcgetattr(fd, &options);
+  cfsetispeed(&options, B115200);
+  cfsetospeed(&options, B115200);
   options.c_cflag |= (CLOCAL | CREAD);
-	options.c_cflag &= ~PARENB;
-	options.c_cflag &= ~CSTOPB;
-	options.c_cflag &= ~CSIZE;
-	options.c_cflag |= CS8;
-	options.c_lflag |= ICANON;
-	options.c_cflag &= ~CRTSCTS;
+  options.c_cflag &= ~PARENB;
+  options.c_cflag &= ~CSTOPB;
+  options.c_cflag &= ~CSIZE;
+  options.c_cflag |= CS8;
+  options.c_lflag |= ICANON;
+  options.c_cflag &= ~CRTSCTS;
   tcsetattr(fd, TCSANOW, &options);
 
   return (fd);
@@ -97,7 +99,8 @@ void timerCallback(const ros::TimerEvent& e)
 
 void parse_string(std::string s)
 {
-  //ROS_INFO(s.c_str());
+  if(!s.c_str())
+    return;
 
   std::string delimiters("RL");
   std::vector<std::string> tokens;
@@ -107,24 +110,26 @@ void parse_string(std::string s)
   // Second is right
   // Third is left
   if (tokens.size() != 3) {
-    ROS_ERROR("Parsing error # of tokens = %d", tokens.size());
+    //ROS_ERROR("Parsing error # of tokens = %d", tokens.size());
     return;
+  } else {
+    //ROS_INFO("Sup");
   }
   
   int r = atoi(tokens[1].c_str());
   int l = atoi(tokens[2].c_str());
-  /*try {
-    r = boost::lexical_cast<int>( tokens[1] );
-    l = boost::lexical_cast<int>( tokens[2] );
-  } catch( boost::bad_lexical_cast const& ) {
-    ROS_ERROR("Parsing error");
-    return;
-  }*/
-  
+
+  double right_speed = r*22/32/0.02;
+  double left_speed = l*22/32/0.02;
+
   geometry_msgs::Twist msg;
-  msg.linear.x = r;
-  msg.linear.y = l;
-  
+  msg.linear.x = (right_speed + left_speed)/2;
+  msg.linear.y = 0;
+  msg.linear.z = 0;
+  msg.angular.z = (right_speed - left_speed)/0.175;
+  msg.angular.x = 0;
+  msg.angular.y = 0;
+
   encoder_pub.publish(msg);
 
   last_arduino_message = ros::Time::now();
@@ -141,37 +146,37 @@ int main(int argc, char* argv [])
   
   ROS_INFO("Serial port openned");
   
-	ros::Subscriber pose_sub = n.subscribe("/command", 1, command_callback);
-	encoder_pub = n.advertise<geometry_msgs::Twist>("/odom", 1);
-	ros::Timer timer = n.createTimer(ros::Duration(0.02), timerCallback);
-	
-	last_arduino_message = ros::Time::now();
-	
+  ros::Subscriber pose_sub = n.subscribe("/command", 1, command_callback);
+  encoder_pub = n.advertise<geometry_msgs::Twist>("/odom", 1);
+  ros::Timer timer = n.createTimer(ros::Duration(0.02), timerCallback);
+  
+  last_arduino_message = ros::Time::now();
+  
   ros::AsyncSpinner spinner(1);
   spinner.start();
-	
-	char buffer[32];
-	int buf_pos = 0;
-	while(ros::ok())
-	{
-	  while(ros::ok()) {
-	    read(fd, buffer+buf_pos, 1);//TODO: non blocking checks and what not
-	    if( buffer[buf_pos] == '\n' || buf_pos == 31) break;
-	    buf_pos++;
-	  }
-	  
-	  if(buf_pos == 31)
-	  {
-	    //TODO: report error, this is odd
-	    buf_pos = 0;
-	  }
-	  else if(buffer[buf_pos] == '\n')
-	  {
-	    std::string s = std::string(buffer, buf_pos + 1);
-	    parse_string(s);
-	    buf_pos = 0;
-	  }
-	  
+  
+  char buffer[32];
+  int buf_pos = 0;
+  while(ros::ok())
+  {
+    while(ros::ok()) {
+      read(fd, buffer+buf_pos, 1);//TODO: non blocking checks and what not
+      if( buffer[buf_pos] == '\n' || buf_pos == 31) break;
+      buf_pos++;
+    }
+    
+    if(buf_pos == 31)
+    {
+      //TODO: report error, this is odd
+      buf_pos = 0;
+    }
+    else if(buffer[buf_pos] == '\n')
+    {
+      std::string s = std::string(buffer, buf_pos + 1);
+      parse_string(s);
+      buf_pos = 0;
+    }
+    
   }
   
   spinner.stop();
