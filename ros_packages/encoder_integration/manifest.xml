@@ -1,0 +1,15 @@
+<package>
+  <description brief="encoder_integration">
+
+     encoder_integration
+
+  </description>
+  <author>Derek Chow</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/encoder_integration</url>
+  <depend package="arduino_comm"/>
+
+</package>
+
+
