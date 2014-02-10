@@ -81,8 +81,23 @@ void command_callback(const geometry_msgs::Twist& msg)
 
 void timerCallback(const ros::TimerEvent& e)
 {
-  //TODO: Map control inputs and outputs and fix sending stuff out
-  write_commands(-cmd.linear.x, -cmd.linear.y);
+  // Saturate commands to stop crazy thing from happening
+  if (cmd.angular.z > 1.0)
+    cmd.angular.z = 1.0;
+  else if (cmd.angular.z < -1.0)
+    cmd.angular.z = -1.0;
+
+  if (cmd.angular.z > 2.0)
+    cmd.angular.z = 2.0;
+  else if (cmd.angular.z < -2.0)
+    cmd.angular.z = -2.0;
+
+  // Map control inputs and outputs and fix sending stuff out
+  double x_cmd = (cmd.linear.x*12.0/0.6271) - (cmd.angular.z*12.0/0.92);
+  double y_cmd = (cmd.linear.x*12.0/0.6271) + (cmd.angular.z*12.0/0.92);
+  
+  
+  write_commands(-x_cmd, -y_cmd);
   
   //Health check
   static int ticks = 0;

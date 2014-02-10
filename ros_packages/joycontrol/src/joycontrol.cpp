@@ -4,45 +4,28 @@
 #include <sensor_msgs/Joy.h>
 #include <geometry_msgs/Twist.h>
 
-//sensor_msgs::Joy sensor;
 geometry_msgs::Twist input;
-
-
 
 void joy_callback(const sensor_msgs::Joy& msg)
 {
-  input.linear.x = msg.axes[1]*12;
-  input.linear.y = -msg.axes[1]*12;
-  //ROS_INFO ("hello");
+  input.linear.x = msg.axes[1]*0.6271;
+  input.angular.z = msg.axes[0]*0.92;
 }
-
-
 
 int main(int argc, char* argv [])
 {
   ros::init(argc,argv,"joycontrol");
   ros::NodeHandle n;
   
-  ros::Subscriber pose_sub = n.subscribe("/joy", 1, joy_callback);
-  //ros::Timer timer = n.createTimer(ros::Duration(0.02), timerCallback);
-  
-  ros::Publisher inputpub = n.advertise<geometry_msgs::Twist>("/command", 1);
-  
+  ros::Subscriber pose_sub = n.subscribe("/joy", 1, joy_callback);  
+  ros::Publisher inputpub = n.advertise<geometry_msgs::Twist>("/command", 1);  
   ros::Rate loop_rate(10);
 
-
-
-  while (ros::ok())
-  {
-
+  while (ros::ok()) {
     inputpub.publish(input);
-
-	ros::spinOnce();
-
+    ros::spinOnce();
     loop_rate.sleep();
-
   }
 	
-  
   return 0;
 }
