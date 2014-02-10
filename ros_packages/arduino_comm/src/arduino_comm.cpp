@@ -119,14 +119,14 @@ void parse_string(std::string s)
   int r = atoi(tokens[1].c_str());
   int l = atoi(tokens[2].c_str());
 
-  double right_speed = r*22/32/0.02;
-  double left_speed = l*22/32/0.02;
+  double right_speed = 0.0256*r;
+  double left_speed = 0.0256*l;
 
   geometry_msgs::Twist msg;
-  msg.linear.x = (right_speed + left_speed)/2;
+  msg.linear.x = (right_speed + left_speed)/2.0;
   msg.linear.y = 0;
   msg.linear.z = 0;
-  msg.angular.z = (right_speed - left_speed)/0.175;
+  msg.angular.z = (right_speed - left_speed)*2.318;
   msg.angular.x = 0;
   msg.angular.y = 0;
 

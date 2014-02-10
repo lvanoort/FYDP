@@ -17,24 +17,26 @@ void encoder_callback(const geometry_msgs::Twist& msg)
   {
     last_integrate = ros::Time::now();
     first = false;
+    return;
   }
 
   ros::Time current_time = ros::Time::now();
 
   double dt = (current_time - last_integrate).toSec();
 
-  State new_state;
+  State new_state = current_state;
   new_state.x += msg.linear.x*cos(current_state.t)*dt;
   new_state.y += msg.linear.x*sin(current_state.t)*dt;
   new_state.t += msg.angular.z*dt;
   if(new_state.t > M_PI)
     new_state.t -= 2*M_PI;
-  if(new_state.t < -M_PI)
+  else if(new_state.t < -M_PI)
     new_state.t += 2*M_PI;
     
   current_state = new_state;
   last_integrate = current_time;
   
+  //ROS_INFO("dt=%f",dt);
   ROS_INFO("x=%f y=%f t=%f", current_state.x, current_state.y, current_state.t);
 }
 
