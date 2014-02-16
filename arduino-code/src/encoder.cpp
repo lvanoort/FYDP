@@ -4,7 +4,7 @@
 bool rline_a;
 bool rline_b;
 
-int rcount = 0;
+volatile int rcount = 0;
 
 int get_count_r()
 {
@@ -52,7 +52,7 @@ void rchan_b()
 bool lline_a;
 bool lline_b;
 
-int lcount = 0;
+volatile int lcount = 0;
 
 int get_count_l()
 {

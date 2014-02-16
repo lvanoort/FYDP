@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "registers.h"
 #include "encoder.h"
+#include "controller.h"
 #include <Servo.h>
 
 //Talons have a 0.9ms to 2.2ms pulse width range
@@ -17,6 +18,11 @@
 
 #define DEBUG_ENCODER 0
 
+#define FEEDBACK //activate feedback, else feedforward 
+#define KP_LEFT 0.2
+#define KP_RIGHT 0.2
+#define SPEED_SCALING_FACTOR 0.512 //ticks per millisecond to metres per second
+
 Servo l_servo1; Servo l_servo2; 
 Servo r_servo1; Servo r_servo2; 
 
@@ -24,6 +30,12 @@ unsigned long last_control;
 unsigned long last_sensor;
 
 unsigned long last_check = 0;
+
+unsigned long last_read_l = 0;
+unsigned long last_read_r = 0;
+double current_speed_l;
+double current_speed_r;
+
 
 void check_reg()
 {
@@ -87,13 +99,26 @@ void loop()
   // Send sensor data
   if (millis() - 20 > last_sensor) { //20ms update
     //TODO send bytes out
-    int r_count = get_count_r();
-    Serial.print("RC");
+    
+	 //probably excessive storing of times and such, but assuming time is constant
+	 //while sending serial data makes me uncomfortable
+	 int r_count = get_count_r();
+    unsigned long current_time = millis();
+	 current_speed_r = ((double)r_count / (current_time-last_read_r))*SPEED_SCALING_FACTOR;
+	 last_read_r = current_time;
+
+	 Serial.print("RC");
     Serial.print(r_count, DEC);
 	 Serial.print("RO");
     Serial.print(integerRegisters[RIGHT_MOTOR_CMD], DEC);
+	 
+
 	 int l_count = get_count_l();
-    Serial.print("LC");
+	 current_time = millis();
+    current_speed_l = ((double)l_count / (current_time-last_read_l))*SPEED_SCALING_FACTOR;
+    last_read_l = current_time;
+
+	 Serial.print("LC");
     Serial.print(l_count, DEC);
 	 Serial.print("LO");
 	 Serial.print(integerRegisters[LEFT_MOTOR_CMD], DEC);
@@ -124,10 +149,20 @@ void loop()
 
   //Write motor command
   if (millis() - 20 > last_control) { //20ms update
-    l_servo1.write(90+integerRegisters[LEFT_MOTOR_CMD]);
+   #ifndef FEEDBACK 
+	 l_servo1.write(90+integerRegisters[LEFT_MOTOR_CMD]);
     l_servo2.write(90+integerRegisters[LEFT_MOTOR_CMD]);
     r_servo1.write(90+integerRegisters[RIGHT_MOTOR_CMD]);
     r_servo2.write(90+integerRegisters[RIGHT_MOTOR_CMD]);
     last_control = millis();
+	#else
+	 int cmdL = proportional(LEFT_MOTOR_CMD, current_speed_l, KP_LEFT);
+	 int cmdR = proportional(RIGHT_MOTOR_CMD, current_speed_r, KP_RIGHT);
+	 l_servo1.write(90+cmdL);
+    l_servo2.write(90+cmdL);
+    r_servo1.write(90+cmdR);
+    r_servo2.write(90+cmdR);
+
+	#endif
   }
 }
