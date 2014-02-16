@@ -3,6 +3,10 @@
 #include "encoder.h"
 #include <Servo.h>
 
+//Talons have a 0.9ms to 2.2ms pulse width range
+#define TALON_MIN_PW 900 
+#define TALON_MAX_PW 2200
+
 #define LEFT_MOTOR_1 13
 #define LEFT_MOTOR_2 14
 
@@ -54,10 +58,10 @@ void setup()
   //initialize control timers
   last_sensor = last_control = last_message = last_check = millis();
 
-  l_servo1.attach(LEFT_MOTOR_1);
-  l_servo2.attach(LEFT_MOTOR_2);
-  r_servo1.attach(RIGHT_MOTOR_1);
-  r_servo2.attach(RIGHT_MOTOR_2);
+  l_servo1.attach(LEFT_MOTOR_1,TALON_MIN_PW,TALON_MAX_PW);
+  l_servo2.attach(LEFT_MOTOR_2,TALON_MIN_PW,TALON_MAX_PW);
+  r_servo1.attach(RIGHT_MOTOR_1,TALON_MIN_PW,TALON_MAX_PW);
+  r_servo2.attach(RIGHT_MOTOR_2,TALON_MIN_PW,TALON_MAX_PW);
   setup_encoders();
 
   delay(2000);
@@ -84,11 +88,15 @@ void loop()
   if (millis() - 20 > last_sensor) { //20ms update
     //TODO send bytes out
     int r_count = get_count_r();
-    Serial.print("R");
+    Serial.print("RC");
     Serial.print(r_count, DEC);
-    int l_count = get_count_l();
-    Serial.print("L");
+	 Serial.print("RO");
+    Serial.print(integerRegisters[RIGHT_MOTOR_CMD], DEC);
+	 int l_count = get_count_l();
+    Serial.print("LC");
     Serial.print(l_count, DEC);
+	 Serial.print("LO");
+	 Serial.print(integerRegisters[LEFT_MOTOR_CMD], DEC);
     Serial.println();
     last_sensor = millis();
   }
@@ -106,20 +114,20 @@ void loop()
     }
 #endif
     
-    l_servo1.write(95);
-    l_servo2.write(95);
-    r_servo1.write(95);
-    r_servo2.write(95);
+    l_servo1.write(90);
+    l_servo2.write(90);
+    r_servo1.write(90);
+    r_servo2.write(90);
     delay(20);
     return;
   }
 
   //Write motor command
   if (millis() - 20 > last_control) { //20ms update
-    l_servo1.write(95+integerRegisters[LEFT_MOTOR_CMD]);
-    l_servo2.write(95+integerRegisters[LEFT_MOTOR_CMD]);
-    r_servo1.write(95+integerRegisters[RIGHT_MOTOR_CMD]);
-    r_servo2.write(95+integerRegisters[RIGHT_MOTOR_CMD]);
+    l_servo1.write(90+integerRegisters[LEFT_MOTOR_CMD]);
+    l_servo2.write(90+integerRegisters[LEFT_MOTOR_CMD]);
+    r_servo1.write(90+integerRegisters[RIGHT_MOTOR_CMD]);
+    r_servo2.write(90+integerRegisters[RIGHT_MOTOR_CMD]);
     last_control = millis();
   }
 }
