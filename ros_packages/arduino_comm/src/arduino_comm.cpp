@@ -103,7 +103,7 @@ void timerCallback(const ros::TimerEvent& e)
   static int ticks = 0;
   ticks++;
   if(ticks > 50) {
-    ROS_INFO("ALIVE");
+    //ROS_INFO("ALIVE");
     ticks = 0;
 
     if( (ros::Time::now() - last_arduino_message).toSec() > 2)
@@ -134,14 +134,14 @@ void parse_string(std::string s)
   int r = atoi(tokens[1].c_str());
   int l = atoi(tokens[2].c_str());
 
-  double right_speed = 0.0256*r;
-  double left_speed = 0.0256*l;
+  //double right_speed = 0.0256*r;
+  //double left_speed = 0.0256*l;
 
   geometry_msgs::Twist msg;
-  msg.linear.x = (right_speed + left_speed)/2.0;
-  msg.linear.y = 0;
-  msg.linear.z = 0;
-  msg.angular.z = (right_speed - left_speed)*2.318;
+  //msg.linear.x = (right_speed + left_speed)/2.0;
+  msg.linear.y = r;
+  msg.linear.z = l;
+  //msg.angular.z = (right_speed - left_speed)*2.318;
   msg.angular.x = 0;
   msg.angular.y = 0;
 
@@ -162,7 +162,7 @@ int main(int argc, char* argv [])
   ROS_INFO("Serial port openned");
   
   ros::Subscriber pose_sub = n.subscribe("/command", 1, command_callback);
-  encoder_pub = n.advertise<geometry_msgs::Twist>("/odom", 1);
+  encoder_pub = n.advertise<geometry_msgs::Twist>("/encoder_odom", 1);
   ros::Timer timer = n.createTimer(ros::Duration(0.02), timerCallback);
   
   last_arduino_message = ros::Time::now();

@@ -97,6 +97,7 @@ void loop()
     Serial.print(l_count, DEC);
 	 Serial.print("LO");
 	 Serial.print(integerRegisters[LEFT_MOTOR_CMD], DEC);
+
     Serial.println();
     last_sensor = millis();
   }
