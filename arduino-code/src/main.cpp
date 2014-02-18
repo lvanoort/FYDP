@@ -169,11 +169,10 @@ void loop()
     r_servo2.write(90+integerRegisters[RIGHT_MOTOR_CMD]);
     last_control = millis();
 	#else
-	 //int cmdL = controller_l(integerRegisters[LEFT_MOTOR_CMD], current_speed_l);
-	 //int cmdR = controller_r(integerRegisters[RIGHT_MOTOR_CMD], current_speed_r);
-
-	 int cmdL = p_control(limit_command((int)integerRegisters[LEFT_MOTOR_CMD],(int)COMMAND_MAX), current_speed_l,KP_LEFT);
-	 int cmdR = p_control(limit_command((int)integerRegisters[RIGHT_MOTOR_CMD],(int)COMMAND_MAX), current_speed_r,KP_RIGHT);
+	//int cmdL = controller_l(limit_command(integerRegisters[LEFT_MOTOR_CMD],(int)COMMAND_MAX), current_speed_l);
+	//int cmdR = controller_r(limit_command(integerRegisters[RIGHT_MOTOR_CMD],(int)COMMAND_MAX), current_speed_r);
+	int cmdL = p_control(limit_command((int)integerRegisters[LEFT_MOTOR_CMD],(int)COMMAND_MAX), current_speed_l,KP_LEFT);
+	int cmdR = p_control(limit_command((int)integerRegisters[RIGHT_MOTOR_CMD],(int)COMMAND_MAX), current_speed_r,KP_RIGHT);
     l_servo1.write(90+cmdL);
    l_servo2.write(90+cmdL);
    r_servo1.write(90+cmdR);

@@ -4,28 +4,31 @@
 #define MOTOR_MAX 90.0
 
 //#define KI 0.6666
-#define KI 10
+#define KI 0.2;
 
 
 double limit_command(double command, double limit) {
-	if(command < -limit) 
-		return -limit;
+	if(command < (-limit)) 
+		return (-limit);
 	if(command > limit)
 		return limit;
+   return command;
 }
 int limit_command(int command, int limit) {
-	if(command < -limit) 
-		return -limit;
+	if(command < (-limit)) 
+		return (-limit);
 	if(command > limit)
 		return limit;
+   return command;
 }
 
 int p_control(int recCommand, double speed, double Kp) {
 	double error = ((recCommand/(12.0 / 0.6271)) - speed);
-	double commandVel = error*Kp;
-	double commandAngle = commandVel * (12.0/.6271);
-	
-   return (int)(limit_command(commandAngle,MOTOR_MAX));
+	double correction = error*Kp;
+	double correctionAngle = correction * (12.0/.6271);
+	double command = correctionAngle+recCommand;
+
+   return (int)limit_command(command,MOTOR_MAX);
 }
 
 int controller_r(int recCommand, double speed) {
@@ -36,7 +39,7 @@ int controller_r(int recCommand, double speed) {
    double correction_angle = correction * (12.0/.6271);
    double commandAngle = recCommand + correction_angle;
 
-	return (int)(limit_command(commandAngle,MOTOR_MAX));
+	return (int)(limit_command(commandAngle,MOTOR_LIMIT));
 }
 
 int controller_l(int recCommand, double speed) {
@@ -47,5 +50,5 @@ int controller_l(int recCommand, double speed) {
    double correction_angle = correction * (12.0/.6271);
    double commandAngle = recCommand + correction_angle;
 
-   return (int)(limit_command(commandAngle,MOTOR_MAX));
+   return (int)(limit_command(commandAngle,MOTOR_LIMIT));
 }
