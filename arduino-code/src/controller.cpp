@@ -2,7 +2,9 @@
 
 #define MOTOR_LIMIT 60.0
 
-#define KI 0.6666
+//#define KI 0.6666
+#define KI 10
+
 
 int proportional(int recCommand, double speed, double Kp) {
 	double error = ((recCommand/(12.0 / 0.6271)) - speed);
