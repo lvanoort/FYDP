@@ -1,0 +1,19 @@
+<package>
+  <description brief="hark_turtlebot_follower">
+
+     hark_turtlebot_follower
+
+  </description>
+  <author>Keisuke Nakamura</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hark_turtlebot_follower</url>
+  <depend package="roscpp"/>
+  <depend package="roslib"/>
+  <depend package="std_msgs"/>
+  <depend package="hark_msgs"/>
+  <depend package="geometry_msgs"/>
+
+</package>
+
+
