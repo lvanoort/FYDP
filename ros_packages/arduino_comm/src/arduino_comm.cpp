@@ -87,10 +87,10 @@ void timerCallback(const ros::TimerEvent& e)
   else if (cmd.angular.z < -1.0)
     cmd.angular.z = -1.0;
 
-  if (cmd.angular.z > 2.0)
+/*  if (cmd.angular.z > 2.0)
     cmd.angular.z = 2.0;
   else if (cmd.angular.z < -2.0)
-    cmd.angular.z = -2.0;
+    cmd.angular.z = -2.0;*/
 
   // Map control inputs and outputs and fix sending stuff out
   double x_cmd = (cmd.linear.x*12.0/0.6271) - (cmd.angular.z*12.0/0.92);
@@ -134,13 +134,13 @@ void parse_string(std::string s)
   int r = atoi(tokens[1].c_str());
   int l = atoi(tokens[2].c_str());
 
-  //double right_speed = 0.0256*r;
-  //double left_speed = 0.0256*l;
+  double right_speed = 0.0256*r; //m/s
+  double left_speed = 0.0256*l;
 
   geometry_msgs::Twist msg;
   //msg.linear.x = (right_speed + left_speed)/2.0;
-  msg.linear.y = r;
-  msg.linear.z = l;
+  msg.linear.y = right_speed;
+  msg.linear.z = left_speed;
   //msg.angular.z = (right_speed - left_speed)*2.318;
   msg.angular.x = 0;
   msg.angular.y = 0;

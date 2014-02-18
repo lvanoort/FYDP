@@ -73,11 +73,11 @@ void lchan_a()
 
   if( !(lline_b ^ lline_a) )
   {
-    lcount--;
+    lcount++;
   }
   else
   {
-    lcount++;
+    lcount--;
   }
 
 }
@@ -88,11 +88,11 @@ void lchan_b()
 
   if( (lline_b ^ lline_a) )
   {
-    lcount--;
+    lcount++;
   }
   else
   {
-    lcount++;
+    lcount--;
   }
 }
 
