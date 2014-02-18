@@ -19,9 +19,11 @@
 #define DEBUG_ENCODER 0
 
 #define FEEDBACK //activate feedback, else feedforward 
-#define KP_LEFT 0.8
-#define KP_RIGHT 0.8
+#define KP_LEFT 5.0
+#define KP_RIGHT 5.0
 #define SPEED_SCALING_FACTOR 0.512 //ticks per millisecond to metres per second
+
+#define COMMAND_MAX 60.0
 
 Servo l_servo1; Servo l_servo2; 
 Servo r_servo1; Servo r_servo2; 
@@ -167,9 +169,12 @@ void loop()
     r_servo2.write(90+integerRegisters[RIGHT_MOTOR_CMD]);
     last_control = millis();
 	#else
-	 int cmdL = controller_l(integerRegisters[LEFT_MOTOR_CMD], current_speed_l);
-	 int cmdR = controller_r(integerRegisters[RIGHT_MOTOR_CMD], current_speed_r);
-	 l_servo1.write(90+cmdL);
+	 //int cmdL = controller_l(integerRegisters[LEFT_MOTOR_CMD], current_speed_l);
+	 //int cmdR = controller_r(integerRegisters[RIGHT_MOTOR_CMD], current_speed_r);
+
+	 int cmdL = p_control(limit_command((int)integerRegisters[LEFT_MOTOR_CMD],(int)COMMAND_MAX), current_speed_l,KP_LEFT);
+	 int cmdR = p_control(limit_command((int)integerRegisters[RIGHT_MOTOR_CMD],(int)COMMAND_MAX), current_speed_r,KP_RIGHT);
+    l_servo1.write(90+cmdL);
    l_servo2.write(90+cmdL);
    r_servo1.write(90+cmdR);
    r_servo2.write(90+cmdR);
