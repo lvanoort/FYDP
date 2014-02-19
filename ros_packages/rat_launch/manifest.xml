@@ -1,0 +1,17 @@
+<package>
+  <description brief="rat_launch">
+
+     rat_launch
+
+  </description>
+  <author>derek</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rat_launch</url>
+  <depend package="arduino_comm"/>
+  <depend package="joycontrol"/>
+  <depend package="openni_launch"/>
+
+</package>
+
+

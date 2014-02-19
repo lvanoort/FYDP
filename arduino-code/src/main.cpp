@@ -1,7 +1,12 @@
 #include <Arduino.h>
 #include "registers.h"
 #include "encoder.h"
+#include "controller.h"
 #include <Servo.h>
+
+//Talons have a 1.0ms to 2.0ms pulse width range
+#define TALON_MIN_PW 1000 
+#define TALON_MAX_PW 2000
 
 #define LEFT_MOTOR_1 13
 #define LEFT_MOTOR_2 14
@@ -13,6 +18,13 @@
 
 #define DEBUG_ENCODER 0
 
+#define FEEDBACK //activate feedback, else feedforward 
+#define KP_LEFT 5.0
+#define KP_RIGHT 5.0
+#define SPEED_SCALING_FACTOR 0.512 //ticks per millisecond to metres per second
+
+#define COMMAND_MAX 60.0
+
 Servo l_servo1; Servo l_servo2; 
 Servo r_servo1; Servo r_servo2; 
 
@@ -20,6 +32,12 @@ unsigned long last_control;
 unsigned long last_sensor;
 
 unsigned long last_check = 0;
+
+unsigned long last_read_l = 0;
+unsigned long last_read_r = 0;
+double current_speed_l;
+double current_speed_r;
+
 
 void check_reg()
 {
@@ -53,11 +71,14 @@ void setup()
 
   //initialize control timers
   last_sensor = last_control = last_message = last_check = millis();
-
-  l_servo1.attach(LEFT_MOTOR_1);
+  /*l_servo1.attach(LEFT_MOTOR_1);
   l_servo2.attach(LEFT_MOTOR_2);
   r_servo1.attach(RIGHT_MOTOR_1);
-  r_servo2.attach(RIGHT_MOTOR_2);
+  r_servo2.attach(RIGHT_MOTOR_2);*/
+  l_servo1.attach(LEFT_MOTOR_1,TALON_MIN_PW,TALON_MAX_PW);
+  l_servo2.attach(LEFT_MOTOR_2,TALON_MIN_PW,TALON_MAX_PW);
+  r_servo1.attach(RIGHT_MOTOR_1,TALON_MIN_PW,TALON_MAX_PW);
+  r_servo2.attach(RIGHT_MOTOR_2,TALON_MIN_PW,TALON_MAX_PW);
   setup_encoders();
 
   delay(2000);
@@ -83,12 +104,37 @@ void loop()
   // Send sensor data
   if (millis() - 20 > last_sensor) { //20ms update
     //TODO send bytes out
-    int r_count = get_count_r();
-    Serial.print("R");
-    Serial.print(r_count, DEC);
-    int l_count = get_count_l();
-    Serial.print("L");
-    Serial.print(l_count, DEC);
+    
+	  //probably excessive storing of times and such, but assuming time is constant
+	  //while sending serial data makes me uncomfortable
+    static double r_last = 0;
+	  int r_count = get_count_r();
+    unsigned long current_time = millis();
+
+    double r_current = (0.1*r_count) + (0.9*r_last);
+	  //last_read_r = current_time;
+
+	  Serial.print("R");
+    Serial.print( ( (int) (1.5*r_current) ) , DEC);
+    r_last = r_current;
+	 //1.5 compensates for lower values as a result of the lowpass+shit encoder
+	  current_speed_r = ((double)1.5*r_current / (current_time-last_read_r))*SPEED_SCALING_FACTOR;
+
+
+
+    static double l_last = 0;
+	  int l_count = get_count_l();
+	  current_time = millis();
+
+    double l_current = (0.1*l_count) + (0.9*l_last);
+
+    current_speed_l = ((double)l_current / (current_time-last_read_l))*SPEED_SCALING_FACTOR;
+
+	  Serial.print("L");
+    Serial.print((int) l_current, DEC);
+    //Serial.print(current_speed_l, DEC);	 
+    l_last = l_current;
+
     Serial.println();
     last_sensor = millis();
   }
@@ -106,20 +152,32 @@ void loop()
     }
 #endif
     
-    l_servo1.write(95);
-    l_servo2.write(95);
-    r_servo1.write(95);
-    r_servo2.write(95);
+    l_servo1.write(90);
+    l_servo2.write(90);
+    r_servo1.write(90);
+    r_servo2.write(90);
     delay(20);
     return;
   }
 
   //Write motor command
   if (millis() - 20 > last_control) { //20ms update
-    l_servo1.write(95+integerRegisters[LEFT_MOTOR_CMD]);
-    l_servo2.write(95+integerRegisters[LEFT_MOTOR_CMD]);
-    r_servo1.write(95+integerRegisters[RIGHT_MOTOR_CMD]);
-    r_servo2.write(95+integerRegisters[RIGHT_MOTOR_CMD]);
+   #ifndef FEEDBACK
+	 l_servo1.write(90+integerRegisters[LEFT_MOTOR_CMD]);
+    l_servo2.write(90+integerRegisters[LEFT_MOTOR_CMD]);
+    r_servo1.write(90+integerRegisters[RIGHT_MOTOR_CMD]);
+    r_servo2.write(90+integerRegisters[RIGHT_MOTOR_CMD]);
     last_control = millis();
+	#else
+	//int cmdL = controller_l(limit_command(integerRegisters[LEFT_MOTOR_CMD],(int)COMMAND_MAX), current_speed_l);
+	//int cmdR = controller_r(limit_command(integerRegisters[RIGHT_MOTOR_CMD],(int)COMMAND_MAX), current_speed_r);
+	int cmdL = p_control(limit_command((int)integerRegisters[LEFT_MOTOR_CMD],(int)COMMAND_MAX), current_speed_l,KP_LEFT);
+	int cmdR = p_control(limit_command((int)integerRegisters[RIGHT_MOTOR_CMD],(int)COMMAND_MAX), current_speed_r,KP_RIGHT);
+    l_servo1.write(90+cmdL);
+   l_servo2.write(90+cmdL);
+   r_servo1.write(90+cmdR);
+   r_servo2.write(90+cmdR);
+
+	#endif
   }
 }

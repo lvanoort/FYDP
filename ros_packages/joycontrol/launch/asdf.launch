@@ -1,0 +1,5 @@
+<launch>  
+  <node pkg="arduino_comm" type="arduino_comm" name="arduino_comm" />
+  <!---node pkg="encoder_integration" type="encoder_integration" name="encoder_integration" /--->
+  <node pkg="joycontrol" type="joycontrol" name="joycontrol" />
+</launch>
