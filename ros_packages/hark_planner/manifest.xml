@@ -1,0 +1,21 @@
+<package>
+  <description brief="hark_planner">
+
+     hark_planner
+
+  </description>
+  <author>Derek Chow</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hark_planner</url>
+  <depend package="rviz"/>
+  <depend package="hark_msgs"/>
+  <depend package="tf2"/>
+  <depend package="tf"/>
+  <depend package="sensor_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="geometry_msgs"/>
+
+</package>
+
+
