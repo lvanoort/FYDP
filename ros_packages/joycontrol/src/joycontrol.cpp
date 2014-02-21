@@ -9,7 +9,7 @@ geometry_msgs::Twist input;
 void joy_callback(const sensor_msgs::Joy& msg)
 {
   input.linear.x = msg.axes[1]*0.6271;
-  input.angular.z = msg.axes[0]*0.92;
+  input.angular.z = msg.axes[0]*2.5;
 }
 
 int main(int argc, char* argv [])
