@@ -9,6 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/encoder_integration</url>
   <depend package="arduino_comm"/>
+  <depend package="nav_msgs"/>
 
 </package>
 

@@ -39,8 +39,8 @@ void publishVisualization(double angle)
   marker.color.a = 0.7;
 
   marker.lifetime = ros::Duration(5);
-	
-	bearing_publisher.publish(marker);
+
+  bearing_publisher.publish(marker);
 }
 
 void harkCallback(const hark_msgs::HarkSourceConstPtr& msg)
@@ -81,6 +81,12 @@ void odomCallback(const geometry_msgs::Twist& msg)
   turn = msg.angular.z;
 }
 
+void vodomCallback(const nav_msgs::Odometry& msg)
+{
+  turn = -msg.twist.twist.angular.y;
+  forward = msg.twist.twist.linear.z;
+}
+
 int main(int argc, char **argv)
 {
   //Initialize the ROS framework
@@ -88,21 +94,28 @@ int main(int argc, char **argv)
   ros::NodeHandle n;
   
   //ros::Subscriber hark_sub = n.subscribe("HarkSource", 1, &harkCallback);
-  ros::Subscriber hark_sub = n.subscribe("/encoder_odom", 1, &odomCallback);
+  //ros::Subscriber enc_sub = n.subscribe("/encoder_odom", 1, &odomCallback);
+  ros::Subscriber venc_sub = n.subscribe("/mono_depth_odometer/odometry", 1, &vodomCallback);
   bearing_publisher = n.advertise<visualization_msgs::Marker>("robot_goal",1);
   ros::Publisher command_pub = n.advertise<geometry_msgs::Twist>("/command",1);
-  
-  ros::Rate loop_rate(10);
-  double angle;
-  while(angle < M_PI/2) {
-    angle += turn*0.1;
+
+  ROS_INFO("Driving");
+  ros::Rate loop_rate(20);
+  double angle = 0;
+  double distance = 0;
+//  while(angle < M_PI/2 && ros::ok()) {
+  while(distance < 0.5 && ros::ok()) {
+//    angle += turn*0.1/1.5;
+    distance += forward*0.05;
+//    ROS_INFO("%f", angle);
+    ROS_INFO("%f", distance);
     geometry_msgs::Twist command;
-    command.linear.x = 0;
+    command.linear.x = 0.4;
     command.linear.y = 0;
     command.linear.z = 0;
     command.angular.x = 0;
     command.angular.y = 0;
-    command.angular.z = 0.3;
+    command.angular.z = 0.0;
     command_pub.publish(command);
     loop_rate.sleep();
     ros::spinOnce();
@@ -120,7 +133,7 @@ int main(int argc, char **argv)
     loop_rate.sleep();
     ros::spinOnce();
   }
-  // turn left
+
   
   
   return 0;
