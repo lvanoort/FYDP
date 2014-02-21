@@ -82,10 +82,10 @@ void command_callback(const geometry_msgs::Twist& msg)
 void timerCallback(const ros::TimerEvent& e)
 {
   // Saturate commands to stop crazy thing from happening
-  if (cmd.angular.z > 1.0)
-    cmd.angular.z = 1.0;
-  else if (cmd.angular.z < -1.0)
-    cmd.angular.z = -1.0;
+  if (cmd.angular.z > 2.0)
+    cmd.angular.z = 2.0;
+  else if (cmd.angular.z < -2.0)
+    cmd.angular.z = -2.0;
 
 /*  if (cmd.angular.z > 2.0)
     cmd.angular.z = 2.0;
@@ -138,10 +138,10 @@ void parse_string(std::string s)
   double left_speed = 0.0256*l;
 
   geometry_msgs::Twist msg;
-  //msg.linear.x = (right_speed + left_speed)/2.0;
+  msg.linear.x = (right_speed + left_speed)/2.0;
   msg.linear.y = right_speed;
   msg.linear.z = left_speed;
-  //msg.angular.z = (right_speed - left_speed)*2.318;
+  msg.angular.z = (right_speed - left_speed)*2.318;
   msg.angular.x = 0;
   msg.angular.y = 0;
 
