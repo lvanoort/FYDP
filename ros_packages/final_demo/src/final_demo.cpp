@@ -56,7 +56,7 @@ void scanCallback(const sensor_msgs::LaserScan& scan)
   }
   else {
     ROS_INFO("CLEAR: %d", obstructed);
-    cmd.linear.x  = 0.4;
+    cmd.linear.x  = 1.0;
     cmd.angular.z = 0; //0.6 * 3.14 / 180.0 * 1.0;
   }
   velocity_publisher.publish(cmd);

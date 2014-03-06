@@ -18,6 +18,7 @@
   <depend package="nav_msgs"/>
   <depend package="roscpp"/>
   <depend package="tf"/>
+  <depend package="hark_msgs"/>
 
 </package>
 
