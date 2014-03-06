@@ -40,7 +40,7 @@ void odomCallback(const nav_msgs::Odometry msg){
 void harkCallback(const hark_msgs::HarkSourceConstPtr& msg)
 {
   ROS_INFO("Received Num of Src [%d]", msg->exist_src_num);
-
+  currentlyTracking = false;
   if(msg->exist_src_num < 1) {
     //pub_.publish(geometry_msgs::Twist());    
   } else {
@@ -59,13 +59,14 @@ void harkCallback(const hark_msgs::HarkSourceConstPtr& msg)
     ROS_INFO("Received [ID,Azimuth] [%d,%f]", msg->src[minidelem].id, msg->src[minidelem].theta);
    // pub_.publish(cmd);
   }
-
+  
+  updateState();
+  doStuff();
 }
 
 void scanCallback(const sensor_msgs::LaserScan& scan)
 {
 
-<<<<<<< Updated upstream
   int obstructed = 0;
 
   //#pragma omp parallel for
@@ -85,17 +86,10 @@ void scanCallback(const sensor_msgs::LaserScan& scan)
   }
 
   geometry_msgs::Twist cmd;
-  if(obstructed > OBS_THRESHOLD) {
-    ROS_INFO("OBSTRUCTED: %d", obstructed);
-    cmd.linear.x  = 0.0;
-    cmd.angular.z = 0; //0.6 * 3.14 / 180.0 * 1.0;
-  }
-  else {
-    ROS_INFO("CLEAR: %d", obstructed);
-    cmd.linear.x  = 1.0;
-    cmd.angular.z = 0; //0.6 * 3.14 / 180.0 * 1.0;
-  }
-  velocity_publisher.publish(cmd);
+  currentlyObstructed = (obstructed > OBS_THRESHOLD);
+  
+  updateState();
+  doStuff();
 }
 
 void updateState() {
@@ -115,8 +109,40 @@ void updateState() {
    }
 }
 
-void search() {
+void doStuff() {
+   switch (state){
+      case SEARCHING:
+         search();
+         break;
+      case TRACKING:
+         track();
+         break;
+      case DODGING:
+         dodge();
+         break;
 
+   }
+}
+
+void search() {
+    geometry_msgs::Twist cmd;
+
+    velocity_publisher.publish(cmd);
+}
+
+void track() {
+    geometry_msgs::Twist cmd;
+
+    cmd.linear.x  = 0.1;
+    cmd.angular.z = currentTarget * 3.14 / 180.0 * 1.0;
+   
+    velocity_publisher.publish(cmd);
+}
+
+void dodge() {
+    geometry_msgs::Twist cmd;
+
+    velocity_publisher.publish(cmd);
 }
 
 protected:
