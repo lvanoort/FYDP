@@ -151,11 +151,11 @@ protected:
    ros::Subscriber scan_sub;
    ros::Subscriber hark_sub;
    ros::Publisher velocity_publisher;
-   bool currentlyObstructed;
-   bool currentlyTracking;
-   double currentTarget;
-   bool doneDodge;
-   int state;
+   static bool currentlyObstructed;
+   static bool currentlyTracking;
+   static double currentTarget;
+   static bool doneDodge;
+   static int state;
    //ros::Publisher map_publisher;
 
 };
