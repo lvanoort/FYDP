@@ -99,6 +99,8 @@ void harkCallback(const hark_msgs::HarkSourceConstPtr& msg)
     for(int num = 0; num < msg->exist_src_num; num++) {
       if(msg->src[num].id > minid ) 
         continue;
+      minidelem = num;
+      minid = msg->src[num].id;
       currentTarget = msg->src[num].theta;
     }
     //ROS_INFO("Received [ID,Azimuth] [%d,%f]", msg->src[minidelem].id, msg->src[minidelem].theta);
