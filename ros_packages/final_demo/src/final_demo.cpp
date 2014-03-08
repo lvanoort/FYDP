@@ -17,6 +17,7 @@ enum RobotModes {
   DODGING_TURN   = 2,
   DODGING_GO     = 3,
   TRACKING       = 4,
+  STOP           = 5,
 };
 
 class SubscribeThenPublish {
@@ -31,7 +32,7 @@ SubscribeThenPublish(ros::NodeHandle &n) :
     //map_publisher = n.advertise<nav_msgs::OccupancyGrid>("/map", 1);
     odom_sub = n_.subscribe("/robo_odo/odometry", 1,  &SubscribeThenPublish::odomCallback, this);
     hark_sub = n_.subscribe("/HarkSource", 1, &SubscribeThenPublish::harkCallback, this);
-    state = DRIVING;
+    state = INITIAL_SEARCH;
 }
 
 void odomCallback(const nav_msgs::Odometry msg) 
@@ -80,6 +81,9 @@ void odomCallback(const nav_msgs::Odometry msg)
 
          velocity_publisher.publish(cmd);
          break;
+      case STOP:
+         velocity_publisher.publish(cmd);
+         break;
       default:
          break;
    }
@@ -89,6 +93,7 @@ void odomCallback(const nav_msgs::Odometry msg)
 
 void harkCallback(const hark_msgs::HarkSourceConstPtr& msg)
 {
+  bool meaningful = false;
   //ROS_INFO("Received Num of Src [%d]", msg->exist_src_num);
   if(msg->exist_src_num < 1) {
     //pub_.publish(geometry_msgs::Twist());    
@@ -102,21 +107,28 @@ void harkCallback(const hark_msgs::HarkSourceConstPtr& msg)
       minidelem = num;
       minid = msg->src[num].id;
       currentTarget = msg->src[num].theta;
+      meaningful = true;
     }
     //ROS_INFO("Received [ID,Azimuth] [%d,%f]", msg->src[minidelem].id, msg->src[minidelem].theta);
    // pub_.publish(cmd);
   }
 
+  if(!meaningful)
+      return;
+
    switch (state) {
       case INITIAL_SEARCH:
          track();
-         if( currentTarget < 5.0*3.1415/180 ) {
+         if( currentTarget < fabs(5.0) ) {
            state = DRIVING;
            ROS_INFO("Moving to: DRIVING");
          }
          break;
       case TRACKING:
          track();
+         break;
+      case STOP:
+         //velocity_publisher.publish(cmd);
          break;
       default:
          break;
@@ -154,6 +166,16 @@ void scanCallback(const sensor_msgs::LaserScan& scan)
            state = DODGING_TURN;
          }
          break;
+      case TRACKING:
+         /*if (currentlyObstructed) {
+           ROS_INFO("Moving to: DODGING_TURN");
+           state = STOP;
+         }*/
+
+         break;
+      case STOP:
+         velocity_publisher.publish(cmd);
+         break;
       default:
          break;
    }
@@ -168,8 +190,15 @@ void search()
 void track() 
 {
   geometry_msgs::Twist cmd;
-  cmd.linear.x  = 0.1;
-  cmd.angular.z = currentTarget * 3.14 / 180.0 * 1.0;
+  cmd.angular.z = currentTarget * 3.14 / 180.0 * 6.0;
+  if(fabs(currentTarget) > 30) {
+   ROS_INFO("TRACKING %f",currentTarget);
+   cmd.linear.x  = 0.0;
+  }
+  else {
+   cmd.linear.x = 0.5;
+   ROS_INFO("Something %f",currentTarget);
+  }
   velocity_publisher.publish(cmd);
 }
 
